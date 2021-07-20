@@ -1,24 +1,23 @@
 {
   "compilerOptions": {
-    "declaration": true,
     "module": "commonjs",
-    "moduleResolution": "node",
     "lib": [
-      "esnext"
+      "es2020"
     ],
-    "target": "es2015",
-    "outDir": "./lib",
+    "declaration": true,
     "removeComments": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "preserveConstEnums": true,
-    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*"

@@ -1,8 +1,10 @@
-import * as express from "express";
-import {pingController} from "./controllers/ping";
+import express from 'express';
+import controller from './controllers';
+import cors from 'cors';
 
 const app = express();
 
-app.use(pingController);
+app.use(cors());
+app.use(controller);
 
 export default app;
