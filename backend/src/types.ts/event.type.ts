@@ -32,7 +32,7 @@ export enum EEventTypes {
 export interface IEvent {
   id: string;
   event_type: EEventTypes;
-  caregiver_id: string;
+  caregiver_id: string | null;
   care_recipient_id: string;
   alert_id: string | null;
   task_instance_id: string | null;

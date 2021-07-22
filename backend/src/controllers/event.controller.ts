@@ -7,13 +7,19 @@ import {
   getEvents,
   getEventTypes,
 } from '../services/event.service';
-import { getEventsQueryValidationSchema } from '../validation-schema/event.validation-schema';
+import {
+  getCaregiversValidationSchema,
+  getCareRecipientsValidationSchema,
+  getDailyRatesValidationSchema,
+  getEventsQueryValidationSchema,
+  getEventTypesQueryValidationSchema,
+} from '../validation-schema/event.validation-schema';
 
 export const eventController = express.Router();
 
 eventController.get(
   '/types',
-  validate('query', getEventsQueryValidationSchema),
+  validate('query', getEventTypesQueryValidationSchema),
   async (req, res, next) => {
     try {
       const events = await getEventTypes(req.query);
@@ -27,7 +33,7 @@ eventController.get(
 
 eventController.get(
   '/caregivers',
-  validate('query', getEventsQueryValidationSchema),
+  validate('query', getCaregiversValidationSchema),
   async (req, res, next) => {
     try {
       const events = await getEventCareGivers(req.query);
@@ -41,7 +47,7 @@ eventController.get(
 
 eventController.get(
   '/care-recipients',
-  validate('query', getEventsQueryValidationSchema),
+  validate('query', getCareRecipientsValidationSchema),
   async (req, res, next) => {
     try {
       const events = await getEventCareRecipients(req.query);
@@ -69,7 +75,7 @@ eventController.get(
 
 eventController.get(
   '/daily-rate',
-  validate('query', getEventsQueryValidationSchema),
+  validate('query', getDailyRatesValidationSchema),
   async (req, res, next) => {
     try {
       const events = await getEventDailyRate(req.query);

@@ -3,7 +3,10 @@ import { Knex } from 'knex';
 
 dotenv.config();
 
-const config: Record<'local' | 'development' | 'test', Knex.Config> = {
+const config: Record<
+  'local' | 'development' | 'production' | 'test',
+  Knex.Config
+> = {
   local: {
     client: 'mysql',
     connection: {
@@ -27,16 +30,7 @@ const config: Record<'local' | 'development' | 'test', Knex.Config> = {
     },
   },
 
-  development: {
-    client: 'mysql',
-    connection: process.env.DATABASE_URL,
-    pool: {
-      min: 2,
-      max: 10,
-    },
-  },
-
-  test: {
+  production: {
     client: 'mysql',
     connection: {
       host: process.env.DB_HOST,
@@ -52,6 +46,24 @@ const config: Record<'local' | 'development' | 'test', Knex.Config> = {
         }
       },
     },
+    pool: {
+      min: 2,
+      max: 10,
+    },
+  },
+
+  development: {
+    client: 'mysql',
+    connection: process.env.DATABASE_URL,
+    pool: {
+      min: 2,
+      max: 10,
+    },
+  },
+
+  test: {
+    client: 'mysql',
+    connection: {},
     pool: {
       min: 2,
       max: 10,

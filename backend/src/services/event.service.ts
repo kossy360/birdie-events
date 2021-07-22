@@ -1,7 +1,7 @@
 import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import { db } from '../models';
 import {
-  IEventRate,
+  IEventRate as IDailyEventTotal,
   IGetEventCareGiversResult,
   IGetEventCareRecipientsResult,
   IGetEventRateResult,
@@ -24,7 +24,7 @@ export const getEventTypes = async (
   if (query.care_recipient_id) {
     builder.where({ care_recipient_id: query.care_recipient_id });
   }
-  if (query.caregiver_id) {
+  if (query.caregiver_id || query.caregiver_id === null) {
     builder.where({ caregiver_id: query.caregiver_id });
   }
 
@@ -66,7 +66,7 @@ export const getEventCareRecipients = async (
   if (query.event_type) {
     builder.where({ event_type: query.event_type });
   }
-  if (query.caregiver_id) {
+  if (query.caregiver_id || query.caregiver_id === null) {
     builder.where({ caregiver_id: query.caregiver_id });
   }
 
@@ -78,9 +78,10 @@ export const getEventCareRecipients = async (
 export const getEvents = async (
   query: IGetEventsQuery
 ): Promise<IGetEventsResult> => {
+  const { page = 1, limit = 10 } = query;
   const builder = eventModel().orderBy('timestamp', 'desc');
 
-  if (query.caregiver_id) {
+  if (query.caregiver_id || query.caregiver_id === null) {
     builder.where({ caregiver_id: query.caregiver_id });
   }
   if (query.care_recipient_id) {
@@ -90,27 +91,15 @@ export const getEvents = async (
     builder.where({ event_type: query.event_type });
   }
 
-  const { data, pagination } = await builder.paginate({
-    perPage: query.limit ?? 10,
-    currentPage: query.page ?? 1,
-    isLengthAware: true,
-  });
+  const [{ total = 0 }] = await builder.clone().count({ total: '*' });
+  const events = await builder.offset((page - 1) * limit).limit(limit);
 
-  return {
-    meta: {
-      pageInfo: {
-        page: pagination.currentPage,
-        limit: pagination.perPage,
-        total: pagination.total,
-      },
-    },
-    events: data,
-  };
+  return { meta: { pageInfo: { page, limit, total: Number(total) } }, events };
 };
 
-// ensure that the difference between 2 rates is at most 1
-export const ensureDailyRates = (rates: IEventRate[]) => {
-  if (rates.length <= 2) return [];
+export const ensureDailyRates = (rates: IDailyEventTotal[]) => {
+  if (rates.length <= 1) return rates;
+  // return rates.concat(rates).map((r) => ({ ...r }));
 
   // array to store transformed rates and fillers
   const paddedRates: IGetEventRateResult['rates'] = [];
@@ -137,10 +126,7 @@ export const ensureDailyRates = (rates: IEventRate[]) => {
     }
 
     // push the current rate
-    paddedRates.push({
-      ...rate,
-      timestamp: currDate,
-    });
+    paddedRates.push({ ...rate, timestamp: currDate });
   });
 
   return paddedRates;
@@ -151,7 +137,7 @@ export const getEventDailyRate = async (
 ): Promise<IGetEventRateResult> => {
   const builder = eventModel().orderBy('timestamp', 'asc');
 
-  if (query.caregiver_id) {
+  if (query.caregiver_id || query.caregiver_id === null) {
     builder.where({ caregiver_id: query.caregiver_id });
   }
   if (query.care_recipient_id) {
@@ -167,14 +153,8 @@ export const getEventDailyRate = async (
     .groupByRaw('DATEDIFF(?, ??)', [new Date('2019'), 'timestamp'])
     .orderBy('timestamp', 'asc');
 
-  // ensure every day existing, for missing days, set the event count to 0
-  const paddedRates: IGetEventRateResult['rates'] = [];
-  let i = 0;
-
-  //   while (i < )
-
   return {
     total: rates.reduce((acc, curr) => acc + (curr.total_events as number), 0),
-    rates: ensureDailyRates(rates as IEventRate[]),
+    rates: ensureDailyRates(rates as IDailyEventTotal[]),
   };
 };

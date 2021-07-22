@@ -36,5 +36,3 @@ export const getCursor = (payload: any): string => {
 
   return str;
 };
-
-
